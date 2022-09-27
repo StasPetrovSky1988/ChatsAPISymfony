@@ -9,10 +9,10 @@ class JWTAuthTest extends WebTestCase
     public function testSomething(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/chat');
-
-        // Check protected action. It should be disabled if you are not logged in.
-        $this->assertResponseStatusCodeSame(401);
+//        $client->request('GET', '/get-chats');
+//
+//        // Check protected action. It should be disabled if you are not logged in.
+//        $this->assertResponseStatusCodeSame(401);
 
         // Try to JWT login
         $client->request(
@@ -28,10 +28,14 @@ class JWTAuthTest extends WebTestCase
         );
 
         $data = json_decode($client->getResponse()->getContent(), true);
+
         $client->setServerParameter('HTTP_Authorization', sprintf('Bearer %s', $data['token']));
 
         // Check protected action again. It should be available
-        $client->request('GET', '/chat');
+        $client->request('GET', '/get-chats');
+
+        var_dump($client->getResponse());
+
         $this->assertResponseIsSuccessful();
 
     }
