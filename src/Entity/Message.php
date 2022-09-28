@@ -2,8 +2,8 @@
 
 namespace App\Entity;
 
-use App\DTO\ChatDTO;
-use App\DTO\MessageDTO;
+use App\Dto\ChatDto;
+use App\Dto\ChatMessageDto;
 use App\Repository\MessageRepository;
 use Carbon\Carbon;
 use Doctrine\DBAL\Types\Types;
@@ -33,17 +33,17 @@ class Message
 
     private function __construct()
     {
-        if (!$this->getCreatedAt()) {
-            $this->setCreatedAt(Carbon::now()->toDateTimeImmutable());
+        if (!$this->createdAt) {
+            $this->createdAt = Carbon::now()->toDateTimeImmutable();
         }
     }
 
     public static function newMessage(User $user, Chat $chat, string $text): self
     {
         $message = new static();
-        $message->setUser($user);
-        $message->setChat($chat);
-        $message->setContent($text);
+        $message->_user = $user;
+        $message->chat = $chat;
+        $message->content = $text;
 
         return $message;
     }
@@ -58,35 +58,9 @@ class Message
         return $this->chat;
     }
 
-    public function setChat(?Chat $chat): self
-    {
-        $this->chat = $chat;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): self
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
     public function getContent(): ?string
     {
         return $this->content;
-    }
-
-    public function setContent(string $content): self
-    {
-        $this->content = $content;
-
-        return $this;
     }
 
     public function getUser(): ?User
@@ -94,15 +68,8 @@ class Message
         return $this->_user;
     }
 
-    public function setUser(?User $_user): self
+    public function getDTO(): ChatMessageDto
     {
-        $this->_user = $_user;
-
-        return $this;
-    }
-
-    public function getDTO(): MessageDTO
-    {
-        return new MessageDTO($this);
+        return new ChatMessageDto($this);
     }
 }

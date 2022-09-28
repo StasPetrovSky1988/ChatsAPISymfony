@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Dto\ChatParticipantDto;
 use App\Repository\UserRepository;
 use Carbon\Carbon;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -46,18 +47,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private function __construct()
     {
         $this->chats = new ArrayCollection();
-        if (!$this->getCreatedAt()) {
-            $this->setCreatedAt(Carbon::now()->toDateTimeImmutable());
+        if (!$this->createdAt) {
+            $this->createdAt = Carbon::now()->toDateTimeImmutable();
         }
     }
 
     //Create user for fixtures
-    public static function forFixtures(string $name, string $email, array $roles): self
+    public static function createNewUser(string $name, string $email, array $roles): self
     {
         $user = new static();
-        $user->setName($name);
-        $user->setEmail($email);
-        $user->setRoles($roles);
+        $user->name = $name;
+        $user->email = $email;
+        $user->roles = $roles;
 
         return $user;
     }
@@ -70,13 +71,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getEmail(): ?string
     {
         return $this->email;
-    }
-
-    public function setEmail(string $email): self
-    {
-        $this->email = $email;
-
-        return $this;
     }
 
     /**
@@ -98,13 +92,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $roles[] = self::ROLE_USER;
 
         return array_unique($roles);
-    }
-
-    public function setRoles(array $roles): self
-    {
-        $this->roles = $roles;
-
-        return $this;
     }
 
     /**
@@ -136,25 +123,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->name;
     }
 
-    public function setName(string $name): self
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): self
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, Chat>
      */
@@ -173,7 +141,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->chats->contains($chat)) {
             $this->chats->add($chat);
-            $chat->addUser($this);
+            $chat->addParticipant($this);
         }
 
         return $this;
@@ -186,5 +154,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+    public function getDTO(): ChatParticipantDto
+    {
+        return new ChatParticipantDto($this);
     }
 }

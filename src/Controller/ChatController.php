@@ -29,13 +29,13 @@ class ChatController extends AbstractController
     #[Route('/get-chats', name: 'get_chats')]
     public function getChats(#[CurrentUser] ?User $user): JsonResponse
     {
-        $chats = [];
+        $chatsDto = [];
 
         foreach ($user->getChats() as $chat) {
-            $chats[] = $chat->getId();
+            $chatsDto[] = $chat->getDTO();
         }
 
-        return $this->json(json_encode($chats));
+        return $this->json($this->serializer->serialize($chatsDto, 'json'));
     }
 
     /**
@@ -44,20 +44,17 @@ class ChatController extends AbstractController
      * @param int $idChat
      * @return JsonResponse
      */
-    #[Route('/get-messages/{idChat}', name: 'get_messages')]
-    public function getMessages(#[CurrentUser] ?User $user, int $idChat): JsonResponse
+    #[Route('/get-chat/{idChat}', name: 'get_messages')]
+    public function getChat(#[CurrentUser] ?User $user, int $idChat): JsonResponse
     {
         $currentChat = $this->chatRepository->find($idChat);
-        $jsonContent = '';
 
         if (!$currentChat) throw new NotFoundHttpException("Chat not found");
         if (!$currentChat->amIConnected($user)) throw new AccessDeniedException("You don't have access to this chat");
 
-        foreach ($currentChat->getMessages() as $message) {
-            $jsonContent .= $this->serializer->serialize($message->getDTO(), 'json');
-        }
+        $chatDto = $currentChat->getDTO();
 
-        return $this->json([json_encode($jsonContent)]);
+        return $this->json($this->serializer->serialize($chatDto, 'json'));
     }
 
     /**

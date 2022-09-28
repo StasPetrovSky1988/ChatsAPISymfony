@@ -32,7 +32,7 @@ class JWTAuthTest extends WebTestCase
         $client->setServerParameter('HTTP_Authorization', sprintf('Bearer %s', $data['token']));
 
         // Check protected action again. It should be available
-        $client->request('GET', '/get-chats');
+        $client->request('GET', '/get-chat/6');
 
         var_dump($client->getResponse());
 

@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\DTO\ChatDTO;
+use App\Dto\ChatDto;
 use App\Repository\ChatRepository;
 use Carbon\Carbon;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -30,17 +30,15 @@ class Chat
     {
         $this->users = new ArrayCollection();
         $this->messages = new ArrayCollection();
-        if (!$this->getCreatedAt()) {
-            $this->setCreatedAt(Carbon::now()->toDateTimeImmutable());
+        if (!$this->createdAt) {
+            $this->createdAt = Carbon::now()->toDateTimeImmutable();
         }
     }
 
     public static function createNewFromUserIntent(User $user): self
     {
-        if (!$user instanceof User) throw new \LogicException("User not found");
-
         $chat = new static();
-        $chat->addUser($user);
+        $chat->addParticipant($user);
 
         return $chat;
     }
@@ -55,22 +53,15 @@ class Chat
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): self
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, User>
      */
-    public function getUsers(): Collection
+    public function getParticipants(): Collection
     {
         return $this->users;
     }
 
-    public function addUser(User $user): self
+    public function addParticipant(User $user): self
     {
         if (!$this->users->contains($user)) {
             $this->users->add($user);
@@ -79,7 +70,7 @@ class Chat
         return $this;
     }
 
-    public function removeUser(User $user): self
+    public function removeParticipant(User $user): self
     {
         $this->users->removeElement($user);
 
@@ -124,8 +115,16 @@ class Chat
         return $this->users->contains($user);
     }
 
-    public function getDTO(): ChatDTO
+    public function getDTO(): ChatDto
     {
-        return new ChatDTO($this);
+        return new ChatDto($this);
+    }
+
+    public function addNewMessage(User $user, string $content): Message
+    {
+        $message = Message::newMessage($user, $this, $content);
+        $this->addMessage($message);
+
+        return $message;
     }
 }

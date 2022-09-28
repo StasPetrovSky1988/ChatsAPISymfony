@@ -1,26 +1,26 @@
 <?php
 
-namespace App\DTO;
+namespace App\Dto;
 
 use App\Entity\Chat;
 use App\Entity\Message;
 use App\Entity\User;
 use DateTimeImmutable;
 
-class MessageDTO
+class ChatMessageDto
 {
     public int $id;
     public DateTimeImmutable $createdAt;
     public string $content;
-    public User $user;
-    public Chat $chat;
+    public string $username;
+    public int $chatId;
 
     public function __construct(Message $message)
     {
         $this->id = $message->getId();
         $this->createdAt = $message->getCreatedAt();
         $this->content = $message->getContent();
-        $this->user = $message->getUser();
-        $this->chat = $message->getChat();
+        $this->username = $message->getUser()->getName();
+        $this->chatId = $message->getChat()->getId();
     }
 }
