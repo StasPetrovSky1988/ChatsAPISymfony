@@ -11,18 +11,18 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class ChatController extends AbstractController
 {
 
-    public function __construct(private ChatRepository $chatRepository)
+    public function __construct(private ChatRepository $chatRepository, private SerializerInterface $serializer)
     {
 
     }
 
     /**
      * Get all chat by current user
-     *
      * @param User|null $user
      * @return JsonResponse
      */
@@ -40,7 +40,6 @@ class ChatController extends AbstractController
 
     /**
      * Get all chat's messages by id
-     *
      * @param User|null $user
      * @param int $idChat
      * @return JsonResponse
@@ -49,22 +48,20 @@ class ChatController extends AbstractController
     public function getMessages(#[CurrentUser] ?User $user, int $idChat): JsonResponse
     {
         $currentChat = $this->chatRepository->find($idChat);
-        $messages = [];
+        $jsonContent = '';
 
         if (!$currentChat) throw new NotFoundHttpException("Chat not found");
         if (!$currentChat->amIConnected($user)) throw new AccessDeniedException("You don't have access to this chat");
 
         foreach ($currentChat->getMessages() as $message) {
-            $messages[$message->getId()]['createdAt'] = $message->getCreatedAt();
-            $messages[$message->getId()]['content'] = $message->getContent();
+            $jsonContent .= $this->serializer->serialize($message->getDTO(), 'json');
         }
 
-        return $this->json([json_encode($messages)]);
+        return $this->json([json_encode($jsonContent)]);
     }
 
     /**
      * Create new chat
-     *
      * @param User|null $user
      * @return JsonResponse
      */

@@ -30,10 +30,7 @@ class UserFixtures extends Fixture
         $userSimple->setPassword($this->hasher->hashPassword($userSimple, 'secret'));
         $manager->persist($userSimple);
 
-        $chat1 = new Chat();
-
-        // Connect Admin user
-        $chat1->addUser($userAdmin);
+        $chat1 = Chat::createNewFromUserIntent($userAdmin);
 
         // Connect Simple user
         $chat1->addUser($userSimple);
@@ -51,8 +48,7 @@ class UserFixtures extends Fixture
 
 
         // Create other Chat
-        $chat2 = new Chat();
-        $chat2->addUser($userAdmin);
+        $chat2 = Chat::createNewFromUserIntent($userAdmin);
         $manager->persist($chat2);
 
         $manager->flush();
