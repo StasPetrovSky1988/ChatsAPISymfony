@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\DTO\ChatDTO;
 use App\Repository\ChatRepository;
 use Carbon\Carbon;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -25,13 +26,23 @@ class Chat
     #[ORM\OneToMany(mappedBy: 'chat', targetEntity: Message::class, orphanRemoval: true)]
     private Collection $messages;
 
-    public function __construct()
+    private function __construct()
     {
         $this->users = new ArrayCollection();
         $this->messages = new ArrayCollection();
         if (!$this->getCreatedAt()) {
             $this->setCreatedAt(Carbon::now()->toDateTimeImmutable());
         }
+    }
+
+    public static function createNewFromUserIntent(User $user): self
+    {
+        if (!$user instanceof User) throw new \LogicException("User not found");
+
+        $chat = new static();
+        $chat->addUser($user);
+
+        return $chat;
     }
 
     public function getId(): ?int
@@ -111,5 +122,10 @@ class Chat
     public function amIConnected($user): bool
     {
         return $this->users->contains($user);
+    }
+
+    public function getDTO(): ChatDTO
+    {
+        return new ChatDTO($this);
     }
 }

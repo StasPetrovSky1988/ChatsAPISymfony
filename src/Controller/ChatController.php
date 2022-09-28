@@ -14,6 +14,12 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 class ChatController extends AbstractController
 {
+
+    public function __construct(private ChatRepository $chatRepository)
+    {
+
+    }
+
     /**
      * Get all chat by current user
      *
@@ -37,13 +43,12 @@ class ChatController extends AbstractController
      *
      * @param User|null $user
      * @param int $idChat
-     * @param ChatRepository $chatRepository
      * @return JsonResponse
      */
     #[Route('/get-messages/{idChat}', name: 'get_messages')]
-    public function getMessages(#[CurrentUser] ?User $user, int $idChat, ChatRepository $chatRepository): JsonResponse
+    public function getMessages(#[CurrentUser] ?User $user, int $idChat): JsonResponse
     {
-        $currentChat = $chatRepository->find($idChat);
+        $currentChat = $this->chatRepository->find($idChat);
         $messages = [];
 
         if (!$currentChat) throw new NotFoundHttpException("Chat not found");
@@ -61,16 +66,14 @@ class ChatController extends AbstractController
      * Create new chat
      *
      * @param User|null $user
-     * @param ChatRepository $chatRepository
      * @return JsonResponse
      */
     #[Route('/create-chat', name: 'create_chat')]
-    public function createChat(#[CurrentUser] ?User $user, ChatRepository $chatRepository): JsonResponse
+    public function createChat(#[CurrentUser] ?User $user): JsonResponse
     {
-        $chat = new Chat();
-        $chat->addUser($user);
+        $chat = Chat::createNewFromUserIntent($user);
 
-        $chatRepository->add($chat, true);
+        $this->chatRepository->add($chat, true);
 
         return $this->json(['id' => $chat->getId()]);
     }

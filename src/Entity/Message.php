@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use App\DTO\ChatDTO;
+use App\DTO\MessageDTO;
 use App\Repository\MessageRepository;
 use Carbon\Carbon;
 use Doctrine\DBAL\Types\Types;
@@ -97,5 +99,10 @@ class Message
         $this->_user = $_user;
 
         return $this;
+    }
+
+    public function getDTO(): MessageDTO
+    {
+        return new MessageDTO($this);
     }
 }
