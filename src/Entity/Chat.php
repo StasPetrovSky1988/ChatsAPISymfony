@@ -21,10 +21,10 @@ class Chat
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'chats')]
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'chats', cascade: ['persist'])]
     private Collection $users;
 
-    #[ORM\OneToMany(mappedBy: 'chat', targetEntity: Message::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'chat', targetEntity: Message::class, cascade: ['persist'], orphanRemoval: true)]
     private Collection $messages;
 
     private function __construct()

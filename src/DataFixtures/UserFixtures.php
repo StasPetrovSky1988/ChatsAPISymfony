@@ -32,19 +32,19 @@ class UserFixtures extends Fixture
 
         // Create chat
         $chat1 = Chat::createNewFromUserIntent($userAdmin);
-        //$chat1->addParticipant($userSimple);
-        //$userSimple->connectTo($chat1);
+        $chat1->addParticipant($userSimple);
         $manager->persist($chat1);
 
+        //$userSimple->connectTo($chat1);
+        //$manager->persist($chat1);
+
         //Add messages
-//        $message = $chat1->addNewMessage($userAdmin, "This is first message by User Admin");
-//        $manager->persist($message);
-//
-//        $message = $chat1->addNewMessage($userAdmin, "This is second message by User Admin");
-//        $manager->persist($message);
-//
-//        $message = $chat1->addNewMessage($userSimple, "This is first message by Simple User");
-//        $manager->persist($message);
+        $chat1->addNewMessage($userAdmin, "This is first message by User Admin");
+        $chat1->addNewMessage($userAdmin, "This is second message by User Admin");
+        $chat1->addNewMessage($userSimple, "This is first message by Simple User");
+
+        $chat1->removeParticipant($userAdmin);
+        $userSimple->leaveChat($chat1);
 
         // Create other Chat
         $chat2 = Chat::createNewFromUserIntent($userAdmin);

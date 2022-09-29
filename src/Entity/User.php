@@ -38,7 +38,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\ManyToMany(targetEntity: Chat::class, mappedBy: 'users')]
+    #[ORM\ManyToMany(targetEntity: Chat::class, mappedBy: 'users', cascade: ['persist'])]
     private Collection $chats;
 
     const ROLE_ADMIN = 'ROLE_ADMIN';

@@ -71,7 +71,6 @@ class ChatController extends AbstractController
     {
         $chat = Chat::createNewFromUserIntent($user);
 
-        //$this->chatRepository->add($chat);
         $this->registry->getManager()->flush();
 
         return $this->json($this->serializer->serialize($chat->getDTO(), 'json'));
