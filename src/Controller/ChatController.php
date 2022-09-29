@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Chat;
 use App\Entity\User;
 use App\Repository\ChatRepository;
+use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,15 +17,11 @@ use Symfony\Component\Serializer\SerializerInterface;
 class ChatController extends AbstractController
 {
 
-    /**
-     * ChatController constructor.
-     * @param ChatRepository $chatRepository
-     * @param SerializerInterface $serializer
-     */
-    public function __construct(private ChatRepository $chatRepository, private SerializerInterface $serializer)
-    {
-
-    }
+    public function __construct(
+        private ChatRepository $chatRepository,
+        private SerializerInterface $serializer,
+        private UserRepository $userRepository,
+    ) { }
 
     /**
      * Get all chat by current user
@@ -76,6 +73,47 @@ class ChatController extends AbstractController
         $this->chatRepository->flush();
 
         return $this->json($this->serializer->serialize($chat->getDTO(), 'json'));
+    }
+
+    /**
+     * join to chat
+     * @param User|null $user
+     * @param int $idChat
+     * @return JsonResponse
+     */
+    #[Route('/join-chat/{idChat}')]
+    public function joinChat(#[CurrentUser] ?User $user, int $idChat): JsonResponse
+    {
+        $chat = $this->chatRepository->find($idChat);
+        if (!$chat) throw new NotFoundHttpException("Chat not found");
+
+        $chat = $chat->addParticipant($user);
+        $this->chatRepository->add($chat);
+
+        $this->chatRepository->flush();
+
+        return $this->json($this->serializer->serialize(true, 'json'));
+    }
+
+    /**
+     * Join other participant to the chat
+     * @param int $idChat
+     * @param int $idUser
+     * @return JsonResponse
+     */
+    #[Route('/join-participant/{idChat}/{idUser}')]
+    public function joinParticipant(int $idChat, int $idUser): JsonResponse
+    {
+        $chat = $this->chatRepository->find($idChat);
+        if (!$chat) throw new NotFoundHttpException("Chat not found");
+
+        $participant = $this->userRepository->find($idUser);
+        if (!$participant) throw new NotFoundHttpException("User not found");
+
+        $this->chatRepository->add($chat->addParticipant($participant));
+        $this->chatRepository->flush();
+
+        return $this->json($this->serializer->serialize(true, 'json'));
     }
 
 }
