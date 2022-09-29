@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\PropertyAccess\Exception\AccessException;
 
 #[ORM\Entity(repositoryClass: ChatRepository::class)]
 class Chat
@@ -30,9 +31,7 @@ class Chat
     {
         $this->users = new ArrayCollection();
         $this->messages = new ArrayCollection();
-        if (!$this->createdAt) {
-            $this->createdAt = Carbon::now()->toDateTimeImmutable();
-        }
+        $this->createdAt = Carbon::now()->toDateTimeImmutable();
     }
 
     public static function createNewFromUserIntent(User $user): self
@@ -85,45 +84,33 @@ class Chat
         return $this->messages;
     }
 
-    public function addMessage(Message $message): self
-    {
-        if (!$this->messages->contains($message)) {
-            $this->messages->add($message);
-            $message->setChat($this);
-        }
-
-        return $this;
-    }
-
-    public function removeMessage(Message $message): self
-    {
-        if ($this->messages->removeElement($message)) {
-            // set the owning side to null (unless already changed)
-            if ($message->getChat() === $this) {
-                $message->setChat(null);
-            }
-        }
-
-        return $this;
-    }
-
     /**
      * Check am i connected in current chat
      */
-    public function amIConnected($user): bool
+    public function amIConnected(User $user): bool
     {
         return $this->users->contains($user);
     }
 
+    /**
+     * @return ChatDto
+     */
     public function getDTO(): ChatDto
     {
         return new ChatDto($this);
     }
 
+    /**
+     * @param User $user
+     * @param string $content
+     * @return Message
+     */
     public function addNewMessage(User $user, string $content): Message
     {
+        if (!$this->amIConnected($user)) throw new AccessException("You are not joined to this chat");
+
         $message = Message::newMessage($user, $this, $content);
-        $this->addMessage($message);
+        $this->messages->add($message);
 
         return $message;
     }

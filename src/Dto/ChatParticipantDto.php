@@ -7,6 +7,7 @@ use App\Entity\User;
 class ChatParticipantDto
 {
     public string $id;
+
     public string $name;
 
     public function __construct(User $user)

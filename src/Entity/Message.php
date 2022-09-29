@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Dto\ChatDto;
 use App\Dto\ChatMessageDto;
 use App\Repository\MessageRepository;
 use Carbon\Carbon;
@@ -33,9 +32,7 @@ class Message
 
     private function __construct()
     {
-        if (!$this->createdAt) {
-            $this->createdAt = Carbon::now()->toDateTimeImmutable();
-        }
+        $this->createdAt = Carbon::now()->toDateTimeImmutable();
     }
 
     public static function newMessage(User $user, Chat $chat, string $text): self
@@ -56,6 +53,11 @@ class Message
     public function getChat(): ?Chat
     {
         return $this->chat;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
     }
 
     public function getContent(): ?string

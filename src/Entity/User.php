@@ -47,9 +47,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private function __construct()
     {
         $this->chats = new ArrayCollection();
-        if (!$this->createdAt) {
-            $this->createdAt = Carbon::now()->toDateTimeImmutable();
-        }
+        $this->createdAt = Carbon::now()->toDateTimeImmutable();
     }
 
     //Create user for fixtures
@@ -133,11 +131,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     /**
      * This method is connecting the user to the chat
-     *
      * @param Chat $chat
      * @return $this
      */
-    public function addChat(Chat $chat): self
+    public function connectTo(Chat $chat): self
     {
         if (!$this->chats->contains($chat)) {
             $this->chats->add($chat);
@@ -147,10 +144,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function removeChat(Chat $chat): self
+    /**
+     * Leave the chat
+     * @param Chat $chat
+     * @return $this
+     */
+    public function leaveChat(Chat $chat): self
     {
-        if ($this->chats->removeElement($chat)) {
-            $chat->removeUser($this);
+        if (!$this->chats->removeElement($chat)) {
+            $chat->removeParticipant($this);
         }
 
         return $this;

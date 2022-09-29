@@ -16,6 +16,11 @@ use Symfony\Component\Serializer\SerializerInterface;
 class ChatController extends AbstractController
 {
 
+    /**
+     * ChatController constructor.
+     * @param ChatRepository $chatRepository
+     * @param SerializerInterface $serializer
+     */
     public function __construct(private ChatRepository $chatRepository, private SerializerInterface $serializer)
     {
 
@@ -67,9 +72,10 @@ class ChatController extends AbstractController
     {
         $chat = Chat::createNewFromUserIntent($user);
 
-        $this->chatRepository->add($chat, true);
+        $this->chatRepository->add($chat);
+        $this->chatRepository->flush();
 
-        return $this->json(['id' => $chat->getId()]);
+        return $this->json($this->serializer->serialize($chat->getDTO(), 'json'));
     }
 
 }
