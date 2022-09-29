@@ -6,6 +6,7 @@ use App\Entity\Chat;
 use App\Entity\User;
 use App\Repository\ChatRepository;
 use App\Repository\UserRepository;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,6 +22,7 @@ class ChatController extends AbstractController
         private ChatRepository $chatRepository,
         private SerializerInterface $serializer,
         private UserRepository $userRepository,
+        private ManagerRegistry $registry,
     ) { }
 
     /**
@@ -69,8 +71,8 @@ class ChatController extends AbstractController
     {
         $chat = Chat::createNewFromUserIntent($user);
 
-        $this->chatRepository->add($chat);
-        $this->chatRepository->flush();
+        //$this->chatRepository->add($chat);
+        $this->registry->getManager()->flush();
 
         return $this->json($this->serializer->serialize($chat->getDTO(), 'json'));
     }
@@ -87,10 +89,8 @@ class ChatController extends AbstractController
         $chat = $this->chatRepository->find($idChat);
         if (!$chat) throw new NotFoundHttpException("Chat not found");
 
-        $chat = $chat->addParticipant($user);
-        $this->chatRepository->add($chat);
-
-        $this->chatRepository->flush();
+        $chat->addParticipant($user);
+        $this->registry->getManager()->flush();
 
         return $this->json($this->serializer->serialize(true, 'json'));
     }
@@ -110,8 +110,8 @@ class ChatController extends AbstractController
         $participant = $this->userRepository->find($idUser);
         if (!$participant) throw new NotFoundHttpException("User not found");
 
-        $this->chatRepository->add($chat->addParticipant($participant));
-        $this->chatRepository->flush();
+        $chat->addParticipant($participant);
+        $this->registry->getManager()->flush();
 
         return $this->json($this->serializer->serialize(true, 'json'));
     }
