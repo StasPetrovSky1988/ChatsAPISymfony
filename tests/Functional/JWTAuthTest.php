@@ -29,12 +29,23 @@ class JWTAuthTest extends WebTestCase
 
         $data = json_decode($client->getResponse()->getContent(), true);
 
+        //
         $client->setServerParameter('HTTP_Authorization', sprintf('Bearer %s', $data['token']));
-
         // Check protected action again. It should be available
-        $client->request('GET', '/join-participant/55/70');
+        $client->request(
+            'POST',
+            '/send-message/60',
+            [],
+            [],
+            ['CONTENT_TYPE' => 'application/json'],
+            json_encode([
+                'message' => 'Hello from client',
+                'type' => 'text',
+            ])
+        );
+        $client->getResponse();
 
-        var_dump($client->getResponse()->getContent());
+        //var_dump($client->getResponse()->getContent(), true);
 
         $this->assertResponseIsSuccessful();
 

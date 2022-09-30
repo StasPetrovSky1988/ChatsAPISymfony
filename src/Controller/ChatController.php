@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Dto\MessageFromClientDto;
 use App\Entity\Chat;
 use App\Entity\User;
 use App\Repository\ChatRepository;
@@ -10,6 +11,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
@@ -111,7 +113,22 @@ class ChatController extends AbstractController
         if (!$participant) throw new NotFoundHttpException("User not found");
 
         $chat->addParticipant($participant);
+        $this->entityManager->flush();
 
+        return $this->json($this->serializer->serialize(true, 'json'));
+    }
+
+    #[Route('/send-message/{idChat}')]
+    public function sendMessage(#[CurrentUser] ?User $user, int $idChat, Request $request): JsonResponse
+    {
+        $chat = $this->chatRepository->find($idChat);
+        if (!$chat) throw new NotFoundHttpException("Chat not found");
+
+        $newMessage = ($this->serializer->deserialize($request->getContent(),MessageFromClientDto::class, 'json'));
+
+        if (!$newMessage->message) throw new NotFoundHttpException("Message is empty");
+
+        $chat->addNewMessage($user, $newMessage->message);
         $this->entityManager->flush();
 
         return $this->json($this->serializer->serialize(true, 'json'));
