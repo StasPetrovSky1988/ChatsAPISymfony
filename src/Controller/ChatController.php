@@ -16,8 +16,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class ChatController extends AbstractController
+class  ChatController extends AbstractController
 {
 
     public function __construct(
@@ -25,6 +26,7 @@ class ChatController extends AbstractController
         private SerializerInterface $serializer,
         private UserRepository $userRepository,
         private EntityManagerInterface $entityManager,
+        private ValidatorInterface $validator,
 
     ) { }
 
@@ -118,6 +120,13 @@ class ChatController extends AbstractController
         return $this->json($this->serializer->serialize(true, 'json'));
     }
 
+    /**
+     * @param User|null $user
+     * @param int $idChat
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Exception
+     */
     #[Route('/send-message/{idChat}')]
     public function sendMessage(#[CurrentUser] ?User $user, int $idChat, Request $request): JsonResponse
     {
@@ -125,8 +134,9 @@ class ChatController extends AbstractController
         if (!$chat) throw new NotFoundHttpException("Chat not found");
 
         $newMessage = ($this->serializer->deserialize($request->getContent(),MessageFromClientDto::class, 'json'));
+        $errors = $this->validator->validate($newMessage);
 
-        if (!$newMessage->message) throw new NotFoundHttpException("Message is empty");
+        if (count($errors) > 0) throw new \Exception((string) $errors);
 
         $chat->addNewMessage($user, $newMessage->message);
         $this->entityManager->flush();

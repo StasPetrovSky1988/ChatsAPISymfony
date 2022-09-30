@@ -34,13 +34,12 @@ class JWTAuthTest extends WebTestCase
         // Check protected action again. It should be available
         $client->request(
             'POST',
-            '/send-message/60',
+            '/send-message/40',
             [],
             [],
             ['CONTENT_TYPE' => 'application/json'],
             json_encode([
                 'message' => 'Hello from client',
-                'type' => 'text',
             ])
         );
         $client->getResponse();
