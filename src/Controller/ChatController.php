@@ -6,7 +6,7 @@ use App\Entity\Chat;
 use App\Entity\User;
 use App\Repository\ChatRepository;
 use App\Repository\UserRepository;
-use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,7 +22,8 @@ class ChatController extends AbstractController
         private ChatRepository $chatRepository,
         private SerializerInterface $serializer,
         private UserRepository $userRepository,
-        private ManagerRegistry $registry,
+        private EntityManagerInterface $entityManager,
+
     ) { }
 
     /**
@@ -71,7 +72,7 @@ class ChatController extends AbstractController
     {
         $chat = Chat::createNewFromUserIntent($user);
 
-        $this->registry->getManager()->flush();
+        $this->entityManager->flush();
 
         return $this->json($this->serializer->serialize($chat->getDTO(), 'json'));
     }
@@ -89,7 +90,7 @@ class ChatController extends AbstractController
         if (!$chat) throw new NotFoundHttpException("Chat not found");
 
         $chat->addParticipant($user);
-        $this->registry->getManager()->flush();
+        $this->entityManager->flush();
 
         return $this->json($this->serializer->serialize(true, 'json'));
     }
@@ -110,7 +111,8 @@ class ChatController extends AbstractController
         if (!$participant) throw new NotFoundHttpException("User not found");
 
         $chat->addParticipant($participant);
-        $this->registry->getManager()->flush();
+
+        $this->entityManager->flush();
 
         return $this->json($this->serializer->serialize(true, 'json'));
     }
