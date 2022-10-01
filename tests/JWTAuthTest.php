@@ -2,31 +2,14 @@
 
 namespace App\Tests;
 
-use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class JWTAuthTest extends WebTestCase
 {
-    public const USERNAME = 'admin@domen.com';
-    public const PASSWORD = 'secret';
+    //use TestHelperTrait;
 
-    // Manual generate token and auth
-    public static function getAuthClient(): KernelBrowser
-    {
-        $client = self::createClient();
-        $encoder = $client->getContainer()->get(JWTEncoderInterface::class);
-
-        $token = $encoder->encode([
-            'username' => self::USERNAME,
-            'password' => self::PASSWORD,
-            'exp' => time() + 3600 // 1 hour expiration
-        ]);
-
-        $client->setServerParameter('HTTP_Authorization', sprintf('Bearer %s', $token));
-
-        return $client;
-    }
+    public const ADMIN_USERNAME = 'admin@domen.com';
+    public const ADMIN_PASSWORD = 'secret';
 
     public function testSomething(): void
     {
@@ -44,8 +27,8 @@ class JWTAuthTest extends WebTestCase
             [],
             ['CONTENT_TYPE' => 'application/json'],
             json_encode([
-                'email' => self::USERNAME,
-                'password' => self::PASSWORD,
+                'email' => self::ADMIN_USERNAME,
+                'password' => self::ADMIN_PASSWORD,
             ])
         );
 

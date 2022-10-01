@@ -53,6 +53,8 @@ class UserFixtures extends Fixture
 
         $chat2 = Chat::createNewFromUserIntent($userAdmin);
         $manager->persist($chat2);
+        $chat2->addNewMessage($userAdmin, "This is first message by User Admin in second chat");
+        $chat2->addNewMessage($userAdmin, "This is second message by User Admin in second chat");
         //$chat2->removeParticipant($userAdmin);
 
 

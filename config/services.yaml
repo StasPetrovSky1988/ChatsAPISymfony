@@ -25,3 +25,6 @@ services:
     App\EventListener\JSONExceptionListener:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
+
+    Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher:
+        public: true

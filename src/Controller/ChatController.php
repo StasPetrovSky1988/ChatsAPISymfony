@@ -100,11 +100,12 @@ class  ChatController extends AbstractController
     }
 
     /**
+     * Leave the chat
      * @param User|null $user
      * @param int $idChat
      * @return JsonResponse
      */
-    #[Route('/leaveChat/{idChat}')]
+    #[Route('/leave-chat/{idChat}')]
     public function leaveChat(#[CurrentUser] ?User $user, int $idChat): JsonResponse
     {
         $chat = $this->chatRepository->find($idChat);
@@ -118,6 +119,7 @@ class  ChatController extends AbstractController
 
     /**
      * Join other participant to the chat
+     * @param User|null $user
      * @param int $idChat
      * @param int $idUser
      * @return JsonResponse
