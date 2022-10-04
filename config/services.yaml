@@ -28,3 +28,7 @@ services:
 
     Symfony\Component\PasswordHasher\Hasher\UserPasswordHasher:
         public: true
+
+    App\Service\FileUploader:
+        arguments:
+            $targetDirectory: '%brochures_directory%'

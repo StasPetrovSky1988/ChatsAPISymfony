@@ -10,4 +10,7 @@ class MessageFromClientDto
     #[Assert\Type(type: 'string')]
     #[Assert\Length(max: 1024)]
     public string $message;
+
+    #[Assert\File]
+    public $file;
 }
